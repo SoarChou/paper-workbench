@@ -1,0 +1,19 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+
+# Local paper content
+paper-reader-ai-branch/papers/*
+!paper-reader-ai-branch/papers/.gitkeep
+paper-reader-ai-branch/inbox/originals/*
+!paper-reader-ai-branch/inbox/originals/.gitkeep
+
+# Runtime/generated data
+paper-reader-ai-branch/data/papers.json
+paper-reader-ai-branch/summaries/papers-overview.csv
+
