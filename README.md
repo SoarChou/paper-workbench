@@ -23,13 +23,32 @@
 
 仓库公开后，在任意电脑上让 Codex 执行下面命令即可完成：下载、安装 skill、启动服务。
 
+### 方式 A：直接给 Codex 仓库链接（推荐）
+
+把下面这句话直接发给 Codex：
+
+```text
+请从这个仓库安装并启动 Paper Workbench：https://github.com/SoarChou/paper-workbench
+```
+
 ### GitHub 地址
 
 ```bash
 tmp=$(mktemp -d) && git clone --depth 1 https://github.com/SoarChou/paper-workbench.git "$tmp/paper-workbench" && sh "$tmp/paper-workbench/codex-auto-install.sh" "$tmp/paper-workbench"
 ```
 
-### Release 压缩包地址（不依赖 git）
+### 方式 B：下载 Release zip 后直接拖给 Codex
+
+先下载最新 release zip：  
+`https://github.com/SoarChou/paper-workbench/releases/latest`
+
+然后把 zip 文件拖进对话框，并发送这句话：
+
+```text
+请安装并启动这个 Paper Workbench 压缩包
+```
+
+### Release 压缩包直链安装（不依赖 git）
 
 ```bash
 tmp=$(mktemp -d) && curl -L --fail --silent --show-error "https://github.com/SoarChou/paper-workbench/releases/latest/download/paper-workbench-product-20260416-auto-install.zip" -o "$tmp/paper-workbench.zip" && unzip -q "$tmp/paper-workbench.zip" -d "$tmp/unzip" && installer=$(find "$tmp/unzip" -type f -name 'codex-auto-install.sh' | head -n 1) && sh "$installer" "$tmp/paper-workbench.zip"
@@ -124,8 +143,3 @@ sh start-paper-workbench.sh
 - `templates/notes-template.md`：阅读笔记结构
 
 后续让 Codex 处理论文时，优先按这些模板生成并回填工作台。
-
-## 分享建议
-
-- 这个仓库默认是 starter 状态，不带你的私人论文数据
-- 如果要长期协作，建议把 skill 和工作台一起维护在同一个仓库里
