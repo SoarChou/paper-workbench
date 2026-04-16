@@ -3,37 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>论文阅读工作台 · AI 简化版</title>
+    <title>CodeX论文阅读工作台</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="shell">
       <header class="hero">
         <div>
-          <p class="eyebrow">AI-First Paper Reader</p>
-          <h1>论文阅读工作台 · 简化版</h1>
-          <p class="subtitle">网页只负责展示、查看和管理；论文摘要、翻译、笔记由我按你的指令生成并回填。</p>
+          <p class="eyebrow">CODEX PAPER WORKBENCH</p>
+          <h1>CodeX论文阅读工作台</h1>
+          <p class="subtitle">集中展示论文原文、译文、笔记与问答沉淀，支持实时查看和管理。</p>
         </div>
         <span id="liveStatus" class="live-indicator">实时连接中…</span>
       </header>
 
       <nav class="top-nav" aria-label="主功能">
-        <button class="feature-tab active" data-feature-tab="dashboard" type="button">Dashboard</button>
-        <button class="feature-tab" data-feature-tab="manage" type="button">论文管理</button>
-        <button class="feature-tab" data-feature-tab="summary" type="button">论文汇总</button>
+        <div class="top-nav-tabs">
+          <button class="feature-tab active" data-feature-tab="dashboard" type="button">论文卡片</button>
+          <button class="feature-tab" data-feature-tab="summary" type="button">论文总览</button>
+        </div>
+        <section class="stats stats-inline" id="stats"></section>
       </nav>
 
       <section class="feature-panel active" data-feature-panel="dashboard">
-        <section class="stats" id="stats"></section>
         <section class="panel cards-panel">
           <div class="section-head">
             <h2>论文卡片</h2>
             <p id="resultMeta">正在加载…</p>
           </div>
-          <div class="controls">
+          <div class="controls controls-compact">
             <div class="control control-search">
-              <label for="searchInput">搜索</label>
-              <input id="searchInput" type="search" placeholder="按标题、作者、会议、分类搜索" />
+              <label for="searchInput">关键词</label>
+              <input id="searchInput" type="search" placeholder="标题 / 作者 / 会议 / 分类" />
             </div>
             <div class="control">
               <label for="categoryFilter">分类</label>
@@ -42,12 +43,15 @@
               </select>
             </div>
             <div class="control">
-              <label for="aiStatusFilter">AI状态</label>
+              <label for="aiStatusFilter">AI进度</label>
               <select id="aiStatusFilter">
                 <option value="all">全部状态</option>
-                <option value="待AI整理">待AI整理</option>
+                <option value="待整理">待整理</option>
+                <option value="待元数据">待元数据</option>
+                <option value="待摘要">待摘要</option>
                 <option value="待翻译">待翻译</option>
                 <option value="待笔记">待笔记</option>
+                <option value="待校对">待校对</option>
                 <option value="已完成">已完成</option>
               </select>
             </div>
@@ -61,155 +65,60 @@
               </select>
             </div>
           </div>
-          <div id="cards" class="cards"></div>
-        </section>
-      </section>
-
-      <section class="feature-panel" data-feature-panel="manage" hidden>
-        <section class="panel manage-panel">
-          <div class="section-head compact">
-            <div>
-              <h2>论文管理</h2>
-              <p>这里只做草稿创建和资料维护；内容生成请直接让我处理。</p>
-            </div>
-          </div>
-
-          <div class="manage-grid">
-            <form id="draftForm" class="form-card">
-              <h3>创建 / 更新条目</h3>
-              <div class="control">
-                <label for="paperSelect">选择已有条目</label>
-                <select id="paperSelect">
-                  <option value="">新建条目</option>
-                </select>
-              </div>
-              <input id="paperId" name="paperId" type="hidden" />
-              <div class="control">
-                <label for="paperTitle">标题</label>
-                <input id="paperTitle" name="title" type="text" placeholder="可为空；若上传 PDF，会先用文件名创建草稿" />
-              </div>
-              <div class="control two-up">
-                <div>
-                  <label for="paperYear">年份</label>
-                  <input id="paperYear" name="year" type="number" min="1900" max="2100" />
-                </div>
-                <div>
-                  <label for="paperCategory">分类</label>
-                  <input id="paperCategory" name="category" type="text" placeholder="例如：加密流量分类" />
-                </div>
-              </div>
-              <div class="control">
-                <label for="paperAuthors">作者</label>
-                <input id="paperAuthors" name="authors" type="text" placeholder="可后续由我补全" />
-              </div>
-              <div class="control">
-                <label for="paperVenue">会议 / 期刊</label>
-                <input id="paperVenue" name="venue" type="text" />
-              </div>
-              <div class="control two-up">
-                <div>
-                  <label for="paperAiStatus">AI状态</label>
-                  <select id="paperAiStatus" name="aiStatus">
-                    <option value="待AI整理">待AI整理</option>
-                    <option value="待翻译">待翻译</option>
-                    <option value="待笔记">待笔记</option>
-                    <option value="已完成">已完成</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="paperReadingStatus">阅读状态</label>
-                  <select id="paperReadingStatus" name="readingStatus">
-                    <option value="待读">待读</option>
-                    <option value="在读">在读</option>
-                    <option value="已读">已读</option>
-                  </select>
-                </div>
-              </div>
-              <div class="control">
-                <label for="paperSummary">摘要</label>
-                <textarea id="paperSummary" name="summary" rows="4" placeholder="可以留空，等我生成"></textarea>
-              </div>
-              <div class="control">
-                <label for="paperTakeaways">关键信息</label>
-                <textarea id="paperTakeaways" name="takeaways" rows="4" placeholder="每行一条；可留空"></textarea>
-              </div>
-              <div class="control">
-                <label for="paperFocus">研究重点</label>
-                <input id="paperFocus" name="focus" type="text" placeholder="一句话即可，可留空" />
-              </div>
-              <div class="control">
-                <label for="paperCitation">引用</label>
-                <textarea id="paperCitation" name="citation" rows="3" placeholder="可留空"></textarea>
-              </div>
-              <div class="control">
-                <label for="paperDoi">DOI / 原文地址</label>
-                <input id="paperDoi" name="doi" type="text" placeholder="如果没有 DOI，可写原文链接到下一个字段" />
-              </div>
-              <div class="control">
-                <label for="paperOriginalUrl">外部原文链接</label>
-                <input id="paperOriginalUrl" name="originalUrl" type="text" placeholder="例如 DOI 页面 / 出版社页面" />
-              </div>
-              <div class="control">
-                <label for="originalFile">上传原文 PDF</label>
-                <input id="originalFile" name="originalFile" type="file" accept=".pdf" />
-              </div>
-              <div class="control two-up">
-                <div>
-                  <label for="translationFile">上传翻译</label>
-                  <input id="translationFile" name="translationFile" type="file" accept=".md,.txt,.doc,.docx" />
-                </div>
-                <div>
-                  <label for="notesFile">上传笔记</label>
-                  <input id="notesFile" name="notesFile" type="file" accept=".md,.txt,.doc,.docx" />
-                </div>
-              </div>
-              <div class="control">
-                <label for="paperTranslation">翻译文本</label>
-                <textarea id="paperTranslation" name="translationText" rows="4" placeholder="可留空，等我生成"></textarea>
-              </div>
-              <div class="control">
-                <label for="paperNotes">笔记文本</label>
-                <textarea id="paperNotes" name="notesText" rows="4" placeholder="可留空，等我生成"></textarea>
-              </div>
-              <div class="form-actions-row">
-                <button class="secondary-btn" id="newDraftBtn" type="button">清空表单</button>
-                <button class="primary-btn" id="submitDraftBtn" type="submit">保存条目</button>
-              </div>
-              <p id="draftFeedback" class="form-feedback">建议：先上传原文建草稿，再直接让我生成摘要 / 翻译 / 笔记。</p>
-            </form>
-
-            <aside class="workflow-card">
-              <h3>推荐工作流</h3>
-              <ol>
-                <li>在这里上传 PDF，创建一个“待AI整理”条目。</li>
-                <li>直接对我说：为某篇论文生成摘要、翻译和阅读笔记。</li>
-                <li>我会更新本目录下的 `data/papers.json`、`papers/.../translation`、`papers/.../notes`。</li>
-                <li>网页会实时刷新，你只负责看和管。</li>
-              </ol>
-              <p class="workflow-hint">推荐提示词：请根据 `paper-reader-ai-branch` 里的某篇论文原文，生成中文摘要、关键信息、翻译和阅读笔记，并更新工作台。</p>
-            </aside>
+          <p class="dashboard-hint">点标题进入阅读页，可并排查看原文、翻译、笔记与问答沉淀。</p>
+          <div id="cardsScroll" class="cards-scroll">
+            <div id="cards" class="cards"></div>
           </div>
         </section>
       </section>
 
       <section class="feature-panel" data-feature-panel="summary" hidden>
-        <section class="panel">
+        <section class="panel summary-panel">
           <div class="section-head compact">
             <div>
-              <h2>论文汇总</h2>
-              <p>只做汇总查看，不在这里生成内容。</p>
+              <h2>论文总览</h2>
+              <p>统一查看、筛选与维护论文条目。</p>
             </div>
           </div>
-          <div class="table-wrap">
-            <table>
+          <div class="summary-toolbar">
+            <p id="summarySelectionMeta" class="summary-selection-meta">已选 0 项</p>
+            <div class="summary-toolbar-actions">
+              <button class="secondary-btn" id="summaryEditSelectedBtn" type="button" disabled>编辑所选</button>
+              <button class="secondary-btn danger-btn" id="summaryDeleteSelectedBtn" type="button" disabled>删除所选</button>
+            </div>
+          </div>
+          <div class="summary-column-control" aria-label="字段显示控制">
+            <span class="summary-column-control-label">字段显示</span>
+            <div id="summaryColumnToggles" class="summary-column-toggles" role="group" aria-label="切换表格字段显示"></div>
+          </div>
+          <div class="table-wrap summary-table-wrap">
+            <table class="summary-table">
+              <colgroup>
+                <col class="summary-col-check" />
+                <col class="summary-col-title" />
+                <col class="summary-col-category" />
+                <col class="summary-col-published" />
+                <col class="summary-col-imported" />
+                <col class="summary-col-last-opened" />
+                <col class="summary-col-ai" />
+                <col class="summary-col-reading" />
+                <col class="summary-col-venue" />
+                <col class="summary-col-actions" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th>标题</th>
-                  <th>分类</th>
-                  <th>年份</th>
-                  <th>AI状态</th>
-                  <th>阅读状态</th>
-                  <th>会议</th>
+                  <th class="summary-col-checkbox">
+                    <input id="summarySelectAll" type="checkbox" aria-label="全选可见条目" />
+                  </th>
+                  <th class="summary-col-title"><button class="sort-btn" type="button" data-action="sort-summary" data-key="title">标题</button></th>
+                  <th class="summary-col-category"><button class="sort-btn" type="button" data-action="sort-summary" data-key="category">分类</button></th>
+                  <th class="summary-col-published"><button class="sort-btn" type="button" data-action="sort-summary" data-key="publishedAt">发表时间</button></th>
+                  <th class="summary-col-imported"><button class="sort-btn" type="button" data-action="sort-summary" data-key="importedAt">导入时间</button></th>
+                  <th class="summary-col-last-opened"><button class="sort-btn" type="button" data-action="sort-summary" data-key="lastOpenedAt">最后打开</button></th>
+                  <th class="summary-col-ai"><button class="sort-btn" type="button" data-action="sort-summary" data-key="aiStatus">AI状态</button></th>
+                  <th class="summary-col-reading"><button class="sort-btn" type="button" data-action="sort-summary" data-key="readingStatus">阅读状态</button></th>
+                  <th class="summary-col-venue"><button class="sort-btn" type="button" data-action="sort-summary" data-key="venue">会议</button></th>
+                  <th class="summary-col-actions">操作</th>
                 </tr>
               </thead>
               <tbody id="tableBody"></tbody>
@@ -218,6 +127,28 @@
         </section>
       </section>
     </div>
+
+    <div id="cardModal" class="card-modal" hidden>
+      <div class="card-modal-backdrop" data-action="close-card-modal"></div>
+      <article class="card-modal-panel" role="dialog" aria-modal="true" aria-labelledby="cardModalTitle">
+        <button class="card-modal-close" type="button" data-action="close-card-modal" aria-label="关闭">×</button>
+        <h3 id="cardModalTitle">论文详情</h3>
+        <p id="cardModalMeta" class="meta"></p>
+        <div id="cardModalStatus"></div>
+        <div id="cardModalTags" class="tags"></div>
+        <section class="card-modal-section">
+          <h4>摘要</h4>
+          <p id="cardModalSummary" class="card-summary"></p>
+        </section>
+        <section class="card-modal-section">
+          <h4>关键信息</h4>
+          <ul id="cardModalTakeaways" class="detail-list"></ul>
+        </section>
+        <p id="cardModalNext" class="card-next"></p>
+        <div id="cardModalActions" class="card-actions"></div>
+      </article>
+    </div>
+
     <script src="./app.js"></script>
   </body>
 </html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>论文阅读页</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./reader.css" />
+  </head>
+  <body>
+    <div class="reader-shell">
+      <header class="reader-page-header">
+        <div>
+          <a class="reader-back" href="/web/">← 返回 Dashboard</a>
+          <h1 id="paperTitle">加载中…</h1>
+          <p id="paperMeta" class="subtitle"></p>
+        </div>
+        <div class="reader-header-actions">
+          <button id="toggleStarBtn" class="reader-star-btn" type="button" aria-pressed="false" title="添加星标">☆ 星标</button>
+          <span id="qaCountBadge" class="reader-qa-count" hidden>问答 0</span>
+          <a id="openOriginalLink" class="primary-btn" href="#" target="_blank" rel="noreferrer" hidden>新窗口打开原文</a>
+        </div>
+      </header>
+
+      <main class="reader-layout">
+        <section class="reader-original-panel">
+          <h2>原文 PDF</h2>
+          <div id="originalContainer" class="reader-original-container">
+            <p class="reader-empty">正在加载原文…</p>
+          </div>
+        </section>
+
+        <section class="reader-side-panel">
+          <div class="reader-side-head">
+            <h2>译文 / 笔记 / 问答</h2>
+            <div class="reader-view-tabs">
+              <button id="viewTranslationBtn" class="mini-btn" data-action="switch-view" data-view="translation" type="button">翻译</button>
+              <button id="viewNotesBtn" class="mini-btn" data-action="switch-view" data-view="notes" type="button">笔记</button>
+              <button id="viewQaBtn" class="mini-btn" data-action="switch-view" data-view="qa" type="button">问答沉淀</button>
+            </div>
+          </div>
+          <div id="sideContent" class="reader-side-content">
+            <p class="reader-empty">正在加载内容…</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./reader.js"></script>
+  </body>
+</html>
