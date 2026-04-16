@@ -8,9 +8,12 @@ PORT="${PAPER_READER_PORT:-8877}"
 WORK_DIR="$INSTALL_BASE/runtime"
 CACHE_DIR="$INSTALL_BASE/cache"
 LOG_DIR="$INSTALL_BASE/logs"
+CONFIG_DIR="$INSTALL_BASE/config"
 APP_DIR="$WORK_DIR/paper-workbench"
+SOURCE_FILE="$CONFIG_DIR/install-source.txt"
+VERSION_FILE="$CONFIG_DIR/installed-version.txt"
 
-mkdir -p "$WORK_DIR" "$CACHE_DIR" "$LOG_DIR"
+mkdir -p "$WORK_DIR" "$CACHE_DIR" "$LOG_DIR" "$CONFIG_DIR"
 
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -103,6 +106,7 @@ install_from_zip_url() {
 }
 
 source_type=""
+SOURCE_RECORD="$SOURCE_INPUT"
 if [ -d "$SOURCE_INPUT" ]; then
   source_type="dir"
 elif [ -f "$SOURCE_INPUT" ]; then
@@ -122,6 +126,10 @@ else
   echo "Invalid source: $SOURCE_INPUT" >&2
   echo "Usage: sh codex-auto-install.sh <repo_dir | zip_path | zip_url | github_url>" >&2
   exit 1
+fi
+
+if [ "$source_type" = "dir" ] || [ "$source_type" = "zip" ]; then
+  SOURCE_RECORD=$(CDPATH= cd -- "$(dirname -- "$SOURCE_INPUT")" && pwd)/$(basename -- "$SOURCE_INPUT")
 fi
 
 case "$source_type" in
@@ -152,6 +160,13 @@ fi
 if [ ! -f "$REPO_ROOT/install-skill.sh" ] || [ ! -f "$REPO_ROOT/start-paper-workbench.sh" ]; then
   echo "Required scripts missing under: $REPO_ROOT" >&2
   exit 1
+fi
+
+printf '%s\n' "$SOURCE_RECORD" > "$SOURCE_FILE"
+if [ -f "$REPO_ROOT/VERSION" ]; then
+  cp "$REPO_ROOT/VERSION" "$VERSION_FILE"
+else
+  : > "$VERSION_FILE"
 fi
 
 sh "$REPO_ROOT/install-skill.sh"
@@ -189,6 +204,9 @@ fi
 
 echo "✅ Paper Workbench installed and started"
 echo "- Repo: $REPO_ROOT"
+if [ -s "$VERSION_FILE" ]; then
+  echo "- Version: $(cat "$VERSION_FILE")"
+fi
 echo "- URL:  http://127.0.0.1:$PORT/web/"
 echo "- PID:  $new_pid"
 echo "- Log:  $LOG_FILE"

@@ -13,7 +13,9 @@
 - `install-skill.sh`：安装 skill
 - `start-paper-workbench.sh`：启动工作台
 - `codex-auto-install.sh`：输入 zip/GitHub 地址自动安装并启动
+- `codex-update.sh`：自动拉取最新版本并重启服务
 - `codex-stop.sh`：停止后台服务
+- `VERSION`：当前发布版本标识
 
 ## 适用场景
 
@@ -70,6 +72,26 @@ cd /absolute/path/paper-workbench && sh codex-auto-install.sh .
 
 ```bash
 sh ~/.paper-workbench/runtime/paper-workbench/codex-stop.sh
+```
+
+## 自动更新（让 Codex 拉最新）
+
+### 方式 A：直接发给 Codex（推荐）
+
+```text
+请把我本机的 Paper Workbench 更新到最新版本并重启服务
+```
+
+### 方式 B：终端一条命令更新
+
+```bash
+sh ~/.paper-workbench/runtime/paper-workbench/codex-update.sh
+```
+
+可选：强制从 release zip 更新
+
+```bash
+sh ~/.paper-workbench/runtime/paper-workbench/codex-update.sh --release
 ```
 
 ## 手动方式（可选）
