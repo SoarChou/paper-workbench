@@ -50,7 +50,7 @@
 ## 启动
 
 ```bash
-cd /Volumes/WD_extend/workspace/codex/paper-workbench-repo/paper-reader-ai-branch
+cd paper-reader-ai-branch
 python3 server.py
 ```
 
