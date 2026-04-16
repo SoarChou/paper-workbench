@@ -26,6 +26,7 @@ If no path exists and user asked to process immediately, report the missing work
 - Do **not** ask step-by-step confirmation like “要不要继续下一步”.
 - **Translation mode gate (single question only):** if translation scope is not explicitly specified, ask exactly one blocking question: `要全文翻译还是精简翻译？`.
 - After the user chooses translation mode, continue end-to-end without further stage-by-stage confirmations.
+- **QA sink rule (mandatory):** if this turn contains a paper-related Q&A answer, append it in the same run via `POST /api/papers/qa` (or file fallback) before finishing.
 - Only ask when truly blocked (missing source file, conflicting target, write permission failure).
 - When assumptions are made (match candidate, inferred title, inferred venue), continue execution and report assumptions explicitly.
 
@@ -95,9 +96,10 @@ For new entries, default `readingStatus=待读` unless user explicitly sets anot
    - `notes/reading-note.md`
    - prefer templates if present
    - after each stage, persist update and advance `aiStatus`
-7. Sync conversation memory when available:
-   - If current turn includes paper-related Q&A, append to `POST /api/papers/qa` in batch mode.
+7. Sync conversation memory (mandatory for paper Q&A turns):
+   - If current turn includes paper-related Q&A, append it via `POST /api/papers/qa` in the same run (use `qaItems[]` when multiple).
    - Ensure QA entries are also沉淀到 `notes/reading-note.md` (via API or fallback file append).
+   - Do not skip QA sink silently; if paper identity is ambiguous, ask one blocking disambiguation question, then append.
 8. Update status progression:
    - `待元数据` → `待摘要` → `待翻译` → `待笔记` → `待校对` → `已完成`
 9. Final persistence check:
@@ -117,6 +119,7 @@ For new entries, default `readingStatus=待读` unless user explicitly sets anot
 - Keep output deterministic and idempotent: reruns should update, not fork duplicate entries.
 - Star/favorite updates should use `starred` boolean only (no custom strings).
 - Q&A沉淀 should be append-only; never delete existing validated QA logs unless user explicitly requests.
+- After answering a paper question, verify `qaCount` increments and `conversationLog` path is present; if not, retry sink once before ending.
 
 ## Quality bar (summary + translation)
 

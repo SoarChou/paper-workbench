@@ -117,7 +117,7 @@ sh start-paper-workbench.sh
 - 生成关键信息
 - 生成中文翻译
 - 生成阅读笔记
-- 维护问答沉淀与状态推进
+- 在 `paper-workbench` 流程里自动沉淀问答并推进状态
 
 ## 目录结构
 

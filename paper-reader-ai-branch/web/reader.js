@@ -433,7 +433,7 @@ async function renderNotesSide(paper) {
 
 async function renderQaSide(paper) {
   const logPath = paper.conversationLog || "";
-  let logHtml = `<p class="reader-empty">还没有问答记录。你可以在下方录入问题和回答，系统会自动沉淀到笔记。</p>`;
+  let logHtml = `<p class="reader-empty">还没有问答记录。你可以在下方录入问题和回答，系统会保存到工作台并同步笔记。</p>`;
 
   if (logPath) {
     try {
@@ -449,7 +449,7 @@ async function renderQaSide(paper) {
   sideContent.innerHTML = `
     <section class="qa-panel">
       <section class="qa-auto-tip">
-        <p>这里的问答会由你和 Codex 的论文对话自动沉淀；下方仅用于补录历史记录。</p>
+        <p>这里的问答会在 paper-workbench 流程中自动沉淀；下方仅用于补录历史记录。</p>
       </section>
       <details class="qa-manual-details">
         <summary>手动补录（可选）</summary>
