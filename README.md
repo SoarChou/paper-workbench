@@ -21,7 +21,7 @@
 
 ## 一键安装并启动（给 Codex 一个地址就行）
 
-在任意电脑上，让 Codex 执行下面任一命令即可完成：下载/安装 skill/启动服务。
+仓库公开后，在任意电脑上让 Codex 执行下面命令即可完成：下载、安装 skill、启动服务。
 
 ### GitHub 地址
 
@@ -29,20 +29,16 @@
 tmp=$(mktemp -d) && git clone --depth 1 https://github.com/SoarChou/paper-workbench.git "$tmp/paper-workbench" && sh "$tmp/paper-workbench/codex-auto-install.sh" "$tmp/paper-workbench"
 ```
 
-私有仓库可用（有权限时）：
+### Release 压缩包地址（不依赖 git）
 
 ```bash
-tmp=$(mktemp -d) && git clone --depth 1 https://<TOKEN>@github.com/SoarChou/paper-workbench.git "$tmp/paper-workbench" && sh "$tmp/paper-workbench/codex-auto-install.sh" "$tmp/paper-workbench"
+tmp=$(mktemp -d) && curl -L --fail --silent --show-error "https://github.com/SoarChou/paper-workbench/releases/latest/download/paper-workbench-product-20260416-auto-install.zip" -o "$tmp/paper-workbench.zip" && unzip -q "$tmp/paper-workbench.zip" -d "$tmp/unzip" && installer=$(find "$tmp/unzip" -type f -name 'codex-auto-install.sh' | head -n 1) && sh "$installer" "$tmp/paper-workbench.zip"
 ```
 
-### 压缩包地址或本地 zip
+### 本地解压后直接安装
 
 ```bash
-tmp=$(mktemp -d) && curl -L --fail --silent --show-error "https://example.com/paper-workbench-product.zip" -o "$tmp/paper-workbench.zip" && unzip -q "$tmp/paper-workbench.zip" -d "$tmp/unzip" && installer=$(find "$tmp/unzip" -type f -name 'codex-auto-install.sh' | head -n 1) && sh "$installer" "$tmp/paper-workbench.zip"
-```
-
-```bash
-cd /absolute/path/paper-workbench-product-20260416 && sh codex-auto-install.sh .
+cd /absolute/path/paper-workbench && sh codex-auto-install.sh .
 ```
 
 启动成功后访问：
@@ -52,7 +48,7 @@ cd /absolute/path/paper-workbench-product-20260416 && sh codex-auto-install.sh .
 停止服务：
 
 ```bash
-sh codex-stop.sh
+sh ~/.paper-workbench/runtime/paper-workbench/codex-stop.sh
 ```
 
 ## 快速开始
