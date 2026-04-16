@@ -36,8 +36,14 @@ If no path exists and user asked to process immediately, report the missing work
   - `GET /api/papers` for snapshot + candidate matching
   - `POST /api/papers` for upsert/import
   - `POST /api/papers/patch` for metadata/status/star updates
+  - `POST /api/papers/content` for translation/notes content writes
   - `POST /api/papers/qa` for batched Q&A沉淀 (`qaItems[]` supported)
-- If API is unavailable, fallback to direct file updates (`data/papers.json`, `papers/*`, `summaries/papers-overview.csv`) in a single deterministic write pass.
+- **Draft-first rule (mandatory):** when user gives a new PDF/keywords/DOI, create a visible draft record first, then run heavy generation.
+  - API mode: call `POST /api/papers` immediately with minimal metadata and source info so the card appears in UI.
+  - Then update stage-by-stage (`aiStatus`, translation, notes, QA) via patch/content/qa endpoints.
+- If API is unavailable, fallback to direct file updates **incrementally**:
+  - write draft to `data/papers.json` + `summaries/papers-overview.csv` first
+  - then update the same record after each stage (not end-only one-shot write)
 - Do not ask users逐步确认每个阶段；默认一次执行到底并回报结果。
 
 ## What this skill owns
@@ -67,32 +73,36 @@ For new entries, default `readingStatus=待读` unless user explicitly sets anot
 
 ## Default workflow
 
-1. Load `data/papers.json`.
+1. Load current snapshot (`GET /api/papers` if available, otherwise `data/papers.json`).
 2. Resolve paper identity:
    - dedupe by DOI first
    - then normalized title
    - then fuzzy title/keywords candidate
 3. Ingest source:
    - for PDF input, store source file under `papers/<category>/<paper-id>/original`
-   - for keyword/DOI input, create or update draft entry
-4. Resolve metadata (best-effort, no fabrication):
+   - for keyword/DOI input, prepare draft fields with pending metadata
+4. **Persist draft immediately (UI-first):**
+   - create/update draft entry now, so frontend can show the paper card before translation/notes finish
+   - set initial `aiStatus` to the earliest pending stage
+5. Resolve metadata (best-effort, no fabrication):
    - filename/title hints
    - first-page text
    - DOI regex in text
    - user-provided keywords/context
-5. Generate requested content:
+6. Generate and sync stage-by-stage:
    - `summary`, `takeaways`, `focus`
    - `translation/zh-CN.md`
    - `notes/reading-note.md`
    - prefer templates if present
-6. Sync conversation memory when available:
+   - after each stage, persist update and advance `aiStatus`
+7. Sync conversation memory when available:
    - If current turn includes paper-related Q&A, append to `POST /api/papers/qa` in batch mode.
    - Ensure QA entries are also沉淀到 `notes/reading-note.md` (via API or fallback file append).
-7. Update status progression:
+8. Update status progression:
    - `待元数据` → `待摘要` → `待翻译` → `待笔记` → `待校对` → `已完成`
-8. Persist:
-   - save `data/papers.json`
-   - sync `summaries/papers-overview.csv`
+9. Final persistence check:
+   - ensure `data/papers.json` and `summaries/papers-overview.csv` are synced
+   - ensure UI-visible fields are consistent with generated artifacts
 
 ## Operating rules
 

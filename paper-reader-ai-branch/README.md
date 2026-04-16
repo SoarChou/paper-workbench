@@ -41,7 +41,7 @@
    - “请为 `paper-reader-ai-branch` 里这篇论文补全元数据，并更新工作台。”
    - “请按标准摘要模板生成摘要、关键信息和研究重点。”
    - “请按标准模板生成中文翻译和阅读笔记。”
-3. 我会更新：
+3. 我会先创建草稿卡片，再按阶段更新：
    - `data/papers.json`
    - `papers/.../translation/zh-CN.md`
    - `papers/.../notes/reading-note.md`
