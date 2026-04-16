@@ -438,9 +438,12 @@ async function renderQaSide(paper) {
   if (logPath) {
     try {
       const markdown = await fetchText(logPath);
-      logHtml = markdown.trim()
-        ? `<article class="reader-markdown qa-log-markdown">${markdownToHtml(markdown)}</article>`
-        : logHtml;
+      const qaEntries = parseQaEntries(markdown);
+      if (qaEntries.length) {
+        logHtml = renderQaEntries(qaEntries);
+      } else if (markdown.trim()) {
+        logHtml = `<article class="reader-markdown qa-log-markdown">${markdownToHtml(markdown)}</article>`;
+      }
     } catch (_) {
       logHtml = `<p class="reader-empty">问答记录暂不可读，稍后会自动重试。</p>`;
     }
@@ -531,6 +534,50 @@ async function renderQaSide(paper) {
       }
     }
   });
+}
+
+function parseQaEntries(markdown) {
+  if (!markdown || typeof markdown !== "string") {
+    return [];
+  }
+  const sections = markdown.split(/\n(?=##\s+)/g);
+  const entries = [];
+  for (const section of sections) {
+    const trimmed = section.trim();
+    if (!trimmed.startsWith("## ")) {
+      continue;
+    }
+    const askedAt = (trimmed.match(/^##\s+(.+)$/m)?.[1] || "").trim();
+    const question = (trimmed.match(/^- 问：([^\n\r]*)/m)?.[1] || "").trim();
+    const answer = (trimmed.match(/^- 答：([^\n\r]*)/m)?.[1] || "").trim();
+    if (!askedAt || !question || !answer) {
+      continue;
+    }
+    entries.push({ askedAt, question, answer });
+  }
+  return entries;
+}
+
+function renderQaEntries(entries) {
+  return `
+    <div class="qa-log-list">
+      ${entries
+        .map(
+          (entry, index) => `
+            <details class="qa-log-item"${index === entries.length - 1 ? " open" : ""}>
+              <summary>
+                <span class="qa-log-time">${escapeHtml(entry.askedAt)}</span>
+                <span class="qa-log-question" title="${escapeHtml(entry.question)}">${escapeHtml(entry.question)}</span>
+              </summary>
+              <div class="qa-log-answer">
+                <p>${escapeHtml(entry.answer)}</p>
+              </div>
+            </details>
+          `
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 async function renderSideContent(paper) {
