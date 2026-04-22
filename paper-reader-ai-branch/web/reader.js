@@ -90,7 +90,7 @@ function renderPendingBlock(statusText, hintText) {
   `;
 }
 
-function markdownToHtml(markdown) {
+function legacyMarkdownToHtml(markdown) {
   const lines = String(markdown || "").replace(/\r\n?/g, "\n").split("\n");
   const chunks = [];
   let inList = false;
@@ -139,6 +139,119 @@ function markdownToHtml(markdown) {
 
   closeList();
   return chunks.join("") || `<p class="reader-empty">内容为空。</p>`;
+}
+
+function resolveMarkedApi() {
+  if (window.marked && typeof window.marked.parse === "function") {
+    return window.marked;
+  }
+  if (window.marked && window.marked.marked && typeof window.marked.marked.parse === "function") {
+    return window.marked.marked;
+  }
+  return null;
+}
+
+const markedApi = resolveMarkedApi();
+if (markedApi?.setOptions) {
+  markedApi.setOptions({
+    gfm: true,
+    breaks: false,
+    mangle: false,
+    headerIds: false,
+  });
+}
+
+function sanitizeMarkdownHtml(rawHtml) {
+  if (!window.DOMPurify?.sanitize) {
+    return String(rawHtml || "");
+  }
+  return window.DOMPurify.sanitize(rawHtml, {
+    USE_PROFILES: { html: true, svg: true, mathMl: true },
+    FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form", "input", "button", "textarea", "select"],
+  });
+}
+
+function resolveMarkdownAssetUrl(rawUrl, basePath) {
+  const target = String(rawUrl || "").trim();
+  if (!target) {
+    return "";
+  }
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(target)) {
+    return safeUrl(target);
+  }
+  if (target.startsWith("/")) {
+    return safeUrl(target);
+  }
+  if (!basePath) {
+    return safeUrl(target);
+  }
+  const normalizedBase = String(basePath || "").split(/[?#]/)[0];
+  const slashIndex = normalizedBase.lastIndexOf("/");
+  const baseDir = slashIndex >= 0 ? normalizedBase.slice(0, slashIndex + 1) : "/";
+  const relativeBase = baseDir.startsWith("/") ? baseDir : `/${baseDir}`;
+  try {
+    const absolute = new URL(target, `${window.location.origin}${relativeBase}`);
+    if (absolute.origin === window.location.origin) {
+      return safeUrl(`${absolute.pathname}${absolute.search}${absolute.hash}`);
+    }
+    return safeUrl(absolute.toString());
+  } catch (_) {
+    return safeUrl(target);
+  }
+}
+
+function renderMathAndHighlight(fragment) {
+  if (window.hljs?.highlightElement) {
+    fragment.querySelectorAll("pre code").forEach((block) => {
+      window.hljs.highlightElement(block);
+    });
+  }
+  if (typeof window.renderMathInElement === "function") {
+    window.renderMathInElement(fragment, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+      strict: "ignore",
+    });
+  }
+}
+
+function markdownToHtml(markdown, { basePath = "" } = {}) {
+  const source = String(markdown || "").replace(/\r\n?/g, "\n");
+  if (!source.trim()) {
+    return `<p class="reader-empty">内容为空。</p>`;
+  }
+  if (!markedApi?.parse) {
+    return legacyMarkdownToHtml(source);
+  }
+  try {
+    const rawHtml = markedApi.parse(source);
+    const sanitizedHtml = sanitizeMarkdownHtml(rawHtml);
+    const template = document.createElement("template");
+    template.innerHTML = sanitizedHtml;
+    template.content.querySelectorAll("a[href]").forEach((link) => {
+      const href = resolveMarkdownAssetUrl(link.getAttribute("href"), basePath);
+      link.setAttribute("href", href);
+      link.setAttribute("target", "_blank");
+      link.setAttribute("rel", "noreferrer noopener");
+    });
+    template.content.querySelectorAll("img[src]").forEach((image) => {
+      image.setAttribute("src", resolveMarkdownAssetUrl(image.getAttribute("src"), basePath));
+      image.setAttribute("loading", "lazy");
+      image.setAttribute("decoding", "async");
+      if (!image.getAttribute("alt")) {
+        image.setAttribute("alt", "插图");
+      }
+    });
+    renderMathAndHighlight(template.content);
+    return template.innerHTML || `<p class="reader-empty">内容为空。</p>`;
+  } catch (_) {
+    return legacyMarkdownToHtml(source);
+  }
 }
 
 async function fetchText(path) {
@@ -325,7 +438,7 @@ async function renderTranslationSide(paper) {
   const state = await loadMarkdownState(paper.translation, "翻译", "translation", paper.aiStatus);
 
   const bodyHtml = state.markdown
-    ? `<article class="reader-markdown">${markdownToHtml(state.markdown)}</article>`
+    ? `<article class="reader-markdown">${markdownToHtml(state.markdown, { basePath: paper.translation })}</article>`
     : state.pendingHtml;
 
   sideContent.innerHTML = `
@@ -340,7 +453,7 @@ async function renderNotesSide(paper) {
   const state = await loadMarkdownState(paper.notes, "笔记", "notes", paper.aiStatus);
   let currentNotesText = state.markdown || "";
   const viewHtml = state.markdown
-    ? `<article class="reader-markdown">${markdownToHtml(state.markdown)}</article>`
+    ? `<article class="reader-markdown">${markdownToHtml(state.markdown, { basePath: paper.notes })}</article>`
     : state.pendingHtml;
 
   sideContent.innerHTML = `
@@ -359,7 +472,7 @@ async function renderNotesSide(paper) {
 
   const renderViewMode = (markdownText) => {
     notesBody.innerHTML = markdownText
-      ? `<article class="reader-markdown">${markdownToHtml(markdownText)}</article>`
+      ? `<article class="reader-markdown">${markdownToHtml(markdownText, { basePath: currentPaper?.notes })}</article>`
       : `<p class="reader-empty">笔记为空，点击上方“编辑笔记”开始填写。</p>`;
   };
 
@@ -442,7 +555,7 @@ async function renderQaSide(paper) {
       if (qaEntries.length) {
         logHtml = renderQaEntries(qaEntries);
       } else if (markdown.trim()) {
-        logHtml = `<article class="reader-markdown qa-log-markdown">${markdownToHtml(markdown)}</article>`;
+        logHtml = `<article class="reader-markdown qa-log-markdown">${markdownToHtml(markdown, { basePath: logPath })}</article>`;
       }
     } catch (_) {
       logHtml = `<p class="reader-empty">问答记录暂不可读，稍后会自动重试。</p>`;

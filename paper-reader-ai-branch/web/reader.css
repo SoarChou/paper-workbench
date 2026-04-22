@@ -147,10 +147,115 @@
   line-height: 1.65;
 }
 
+.reader-markdown h1 {
+  margin: 2px 0 10px;
+  font-size: 1.36rem;
+}
+
 .reader-markdown ul {
   margin: 0 0 10px;
   line-height: 1.65;
   padding-left: 18px;
+}
+
+.reader-markdown ol {
+  margin: 0 0 10px;
+  line-height: 1.65;
+  padding-left: 20px;
+}
+
+.reader-markdown li + li {
+  margin-top: 4px;
+}
+
+.reader-markdown a {
+  color: #1d4ed8;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(29, 78, 216, 0.45);
+}
+
+.reader-markdown a:hover {
+  color: #1e40af;
+  border-bottom-style: solid;
+}
+
+.reader-markdown blockquote {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-left: 3px solid rgba(47, 111, 237, 0.5);
+  background: #f8fbff;
+  color: #415776;
+}
+
+.reader-markdown img {
+  display: block;
+  max-width: min(100%, 960px);
+  height: auto;
+  margin: 8px auto 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 112, 140, 0.22);
+  background: #fff;
+}
+
+.reader-markdown pre {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 112, 140, 0.2);
+  background: #f6f8fa;
+  overflow: auto;
+}
+
+.reader-markdown pre code {
+  white-space: pre;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.reader-markdown code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.93em;
+}
+
+.reader-markdown :not(pre) > code {
+  display: inline-block;
+  border-radius: 6px;
+  padding: 1px 6px;
+  border: 1px solid rgba(96, 112, 140, 0.2);
+  background: rgba(96, 112, 140, 0.1);
+}
+
+.reader-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.reader-markdown table th,
+.reader-markdown table td {
+  border: 1px solid rgba(96, 112, 140, 0.2);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.reader-markdown table th {
+  background: #f6f8fc;
+  font-weight: 700;
+}
+
+.reader-markdown hr {
+  border: none;
+  border-top: 1px solid rgba(96, 112, 140, 0.2);
+  margin: 12px 0;
+}
+
+.reader-markdown .katex-display {
+  margin: 8px 0 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
 }
 
 .reader-pending {
