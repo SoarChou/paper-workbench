@@ -42,6 +42,8 @@ const SUMMARY_COLUMN_CONFIG = [
   { key: "venue", label: "会议" },
 ];
 const SUMMARY_COLUMN_STORAGE_KEY = "paperWorkbench.summary.visibleColumns.v1";
+const FEATURE_TAB_STORAGE_KEY = "paperWorkbench.ui.featureTab.v1";
+const DEFAULT_FEATURE_TAB = "dashboard";
 const summaryState = {
   sortKey: "importedAt",
   sortDirection: "desc",
@@ -84,6 +86,34 @@ function loadSummaryVisibleColumns() {
 function persistSummaryVisibleColumns() {
   try {
     window.localStorage.setItem(SUMMARY_COLUMN_STORAGE_KEY, JSON.stringify([...summaryState.visibleColumns]));
+  } catch (_) {
+    // ignore storage failures
+  }
+}
+
+function isValidFeatureTab(tab) {
+  return [...featureTabButtons].some((button) => button.dataset.featureTab === tab);
+}
+
+function loadFeatureTab() {
+  try {
+    const saved = String(window.localStorage.getItem(FEATURE_TAB_STORAGE_KEY) || "").trim();
+    if (saved && isValidFeatureTab(saved)) {
+      return saved;
+    }
+  } catch (_) {
+    // ignore storage failures
+  }
+  const activeTab = document.querySelector("[data-feature-tab].active")?.dataset.featureTab;
+  if (activeTab && isValidFeatureTab(activeTab)) {
+    return activeTab;
+  }
+  return DEFAULT_FEATURE_TAB;
+}
+
+function persistFeatureTab(tab) {
+  try {
+    window.localStorage.setItem(FEATURE_TAB_STORAGE_KEY, tab);
   } catch (_) {
     // ignore storage failures
   }
@@ -311,15 +341,17 @@ function hideCardModal({ immediate = false } = {}) {
 }
 
 function switchFeatureTab(tab) {
+  const targetTab = isValidFeatureTab(tab) ? tab : DEFAULT_FEATURE_TAB;
   featureTabButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.featureTab === tab);
+    button.classList.toggle("active", button.dataset.featureTab === targetTab);
   });
   featurePanels.forEach((panel) => {
-    const active = panel.dataset.featurePanel === tab;
+    const active = panel.dataset.featurePanel === targetTab;
     panel.hidden = !active;
     panel.classList.toggle("active", active);
     panel.setAttribute("aria-hidden", String(!active));
   });
+  persistFeatureTab(targetTab);
   closeCardExpand({ immediate: true });
 }
 
@@ -1412,7 +1444,7 @@ async function handleInlineEditSubmit(event) {
     await fetchPapers();
     summaryState.selectedIds.clear();
     summaryState.selectedIds.add(paperId);
-    openInlineEditor(paperId);
+    closeInlineEditor();
   } catch (error) {
     window.alert(error.message || "保存失败，请重试。");
   }
@@ -1486,6 +1518,6 @@ if (summaryDeleteSelectedBtn) {
 syncStaticSelects();
 renderSummaryColumnToggles();
 applySummaryColumnVisibility();
-switchFeatureTab(document.querySelector("[data-feature-tab].active")?.dataset.featureTab || "dashboard");
+switchFeatureTab(loadFeatureTab());
 fetchPapers();
 connectEvents();
