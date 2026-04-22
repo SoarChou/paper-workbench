@@ -178,6 +178,19 @@ if [ "${PAPER_WORKBENCH_NO_START:-0}" = "1" ]; then
   exit 0
 fi
 
+if [ -f "$REPO_ROOT/codex-service.sh" ]; then
+  if PAPER_WORKBENCH_HOME="$INSTALL_BASE" PAPER_READER_PORT="$PORT" sh "$REPO_ROOT/codex-service.sh" install; then
+    echo "✅ Paper Workbench installed and started"
+    echo "- Repo: $REPO_ROOT"
+    if [ -s "$VERSION_FILE" ]; then
+      echo "- Version: $(cat "$VERSION_FILE")"
+    fi
+    echo "- URL:  http://127.0.0.1:$PORT/web/"
+    echo "- Service: launchd keep-alive enabled"
+    exit 0
+  fi
+fi
+
 PID_FILE="$WORK_DIR/server.pid"
 if [ -f "$PID_FILE" ]; then
   old_pid=$(cat "$PID_FILE" 2>/dev/null || true)

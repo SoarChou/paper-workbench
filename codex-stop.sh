@@ -3,6 +3,12 @@ set -eu
 
 INSTALL_BASE="${PAPER_WORKBENCH_HOME:-$HOME/.paper-workbench}"
 PID_FILE="$INSTALL_BASE/runtime/server.pid"
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+if [ -f "$SCRIPT_DIR/codex-service.sh" ]; then
+  sh "$SCRIPT_DIR/codex-service.sh" stop
+  exit 0
+fi
 
 if [ ! -f "$PID_FILE" ]; then
   echo "No running Paper Workbench PID file found: $PID_FILE"

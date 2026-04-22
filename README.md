@@ -12,6 +12,7 @@
 - `skill/paper-workbench/SKILL.md`：可安装到 Codex 的复用 skill
 - `install-skill.sh`：安装 skill
 - `start-paper-workbench.sh`：启动工作台
+- `codex-service.sh`：服务常驻管理（start/stop/restart/status）
 - `codex-auto-install.sh`：输入 zip/GitHub 地址自动安装并启动
 - `codex-update.sh`：自动拉取最新版本并重启服务
 - `codex-stop.sh`：停止后台服务
@@ -74,6 +75,12 @@ cd /absolute/path/paper-workbench && sh codex-auto-install.sh .
 sh ~/.paper-workbench/runtime/paper-workbench/codex-stop.sh
 ```
 
+查看服务状态：
+
+```bash
+sh ~/.paper-workbench/runtime/paper-workbench/codex-service.sh status
+```
+
 ## 自动更新（让 Codex 拉最新）
 
 ### 方式 A：直接发给 Codex（推荐）
@@ -117,6 +124,8 @@ sh install-skill.sh
 ```bash
 sh start-paper-workbench.sh
 ```
+
+默认会注册为常驻服务（macOS launchd keep-alive），即使异常退出也会自动拉起。
 
 默认地址：
 
